@@ -25,14 +25,16 @@
   "dependencies": [],
   "capabilities": [
     "send.text",
-    "send.forward",
-    "config.get"
+    "send.forward"
   ],
   "i18n": {
-    "default_locale": "zh-CN",
-    "locales_path": "_locales",
+    "default_locale": "zh",
+    "locales_path": "locales",
     "supported_locales": [
-      "zh-CN"
+      "zh",
+      "la",
+      "grc",
+      "ja"
     ]
   },
   "id": "riesaexe.life-behavior-reference"

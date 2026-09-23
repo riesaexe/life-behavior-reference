@@ -10,6 +10,20 @@
 
 > **来源与衍生开发**：本插件以 [DeepSeek-V4-Pro/life_behavior_reference](https://github.com/DeepSeek-V4-Pro/life_behavior_reference) 为灵感与基础，是在原项目基础上的二次开发与改造。
 
+## 与原项目相比的改造
+
+本项目保留原项目的生活行为参考主题与基础条目，并在内容规模、检索方式、文档呈现和工程结构上持续扩展；它是独立维护的衍生插件，不是原项目的官方版本。
+
+- **从基础条目扩展为分类行为库**：中文库现收录 365 条，按 12 个大类、31 个小类组织，覆盖身体维护、居家、饮食、穿戴、出行、数码、学习工作、社交、购物财务、休闲、情绪心理和公共安全。拉丁语、古希腊语和日语模块仍提供各自的基础行为目录，不将中文的 365 条误称为四语全量覆盖。
+- **增加随机抽取与分层帮助**：`/rs 生活参考` 从中文库随机抽取一条；`/rs 生活参考 帮助` 逐级展示大类、小类及其条目。其他语种保留各自目录命令；命令前缀可配置，默认 `/rs`。
+- **把主体改为可执行的生活指南**：输出围绕具体行为的操作顺序和场景提示组织，不以实验记录或学术研讨过程为主体；学术档案样式保留委员会、公文与引文的严肃腔调，并以风险提示和少量“风味”警示形成反差。四种信息密度中「学术」为默认值。
+- **扩充并关联参考资料**：学术资料库包含 64 条基础书目，并按行为小类和所属主题关联资料；每份学术档案列出五条主题相关的虚构参考资料。同一语种、同一条目的引用保持稳定，避免每次查询都换一组出处。书目是项目设定，不是真实检索来源。
+- **让单条文档可重复复现**：版本、编号、密级、编制署名、分类信息及引用按条目稳定生成；同一条目重复查询仍是同一份档案，不会因重新抽取而改变身份信息。
+- **按语种拆分内容**：语言数据从集中在单个 Python 文件的维护方式拆为 `locales/zh.py`、`locales/la.py`、`locales/grc.py` 与 `locales/ja.py`，由共用插件逻辑完成命令分发和呈现，便于分别维护。
+- **适配独立分发**：插件使用独立 ID `riesaexe.life-behavior-reference`，配置模型提供默认 `/rs` 前缀和输出风格选项；MaiBot 首次加载时按配置模型生成运行实例的本地 `config.toml`，仓库不携带这份实例配置。
+
+转发消息中的部门署名、档案卡片和机构均为虚构呈现。卡片使用占位 `user_id: "0"` 构造，不对应、代表或冒充任何真实群成员。
+
 ## 项目背景
 
 在日常社会交互过程中，多数人类个体能够自然地执行进食、位移、社交仪式等基础行为，无需任何外部指导。然而，委员会在长期观测中发现，部分人群对上述行为的规范化执行存在系统性认知缺口——表现为动作序列紊乱、社交信号误读以及关键子程序的缺失。
@@ -79,14 +93,14 @@
 ### 安装
 
 1. 将 `life-behavior-reference` 文件夹完整复制到 MaiBot 的 `plugins/` 目录下
-2. 确保 `plugins/life-behavior-reference/_manifest.json`、`plugin.py`、`config.toml` 三个文件均在目录内
+2. 确保 `plugins/life-behavior-reference/_manifest.json`、`plugin.py` 和 `locales/` 目录均在目录内；无需从仓库复制 `config.toml`
 3. 重启 MaiBot 或通过插件管理面板加载插件
 
 ### 启用
 
-插件安装后默认启用。如需手动控制：
+插件安装后默认启用。MaiBot 首次加载时会根据插件配置模型自动生成当前运行实例的本地 `config.toml`；该文件不属于插件仓库内容，也不应提交到版本库。如需手动控制：
 
-1. 打开 `plugins/life-behavior-reference/config.toml`
+1. 打开当前 MaiBot 实例首次加载时生成的 `plugins/life-behavior-reference/config.toml`
 2. 将 `[plugin]` 段的 `enabled` 设为 `true` 或 `false`
 3. 重启 MaiBot 或触发配置热重载
 
@@ -150,7 +164,7 @@
 
 ## 配置说明
 
-插件配置文件位于 `plugins/life-behavior-reference/config.toml`。
+配置项由插件的配置模型定义。MaiBot 首次加载插件时会在当前实例的插件目录中生成本地 `config.toml`；不要要求仓库包含该文件，也不要将不同实例的本地配置相互覆盖。
 
 ### `[plugin]` 基础配置段
 
@@ -181,7 +195,7 @@
 
 ### 输出内容太短/太长
 
-在 `config.toml` 中调整 `style.detail_level` 的值（参考上方配置说明表格），重启或触发配置热重载后生效。
+在 MaiBot 为当前实例生成的本地 `config.toml` 中调整 `style.detail_level`（参考上方配置说明表格），重启或触发配置热重载后生效；不要修改或提交插件仓库中的配置副本。
 
 ### 为什么同一条目重复查询时版本号、密级和编制信息相同？
 
@@ -205,7 +219,7 @@
 
 ### 为什么用转发消息而不是普通文本输出？
 
-多卡片转发格式允许委员会的不同下设部门各自签署其负责的输出段落，形成与真实多部门协作流程一致的呈现效果。此设计亦便于使用者在收到回复后以卡片为单位进行存档或引用，相比单一文本块具有更优的信息组织效率。
+多卡片转发格式用于模拟委员会下设部门分段签署档案的呈现方式，便于按卡片阅读和存档。它是插件构造的虚构档案卡片：占位发送者 ID 为 `0`，部门和署名不代表、也不冒充任何真实群成员。
 
 ---
 
@@ -295,14 +309,14 @@
 ### インストール
 
 1. `life-behavior-reference` フォルダを MaiBot の `plugins/` ディレクトリに完全に複製する
-2. `plugins/life-behavior-reference/_manifest.json`、`plugin.py`、`config.toml` の三ファイルがディレクトリ内に存在することを確認する
+2. `plugins/life-behavior-reference/_manifest.json`、`plugin.py`、`locales/` が存在することを確認する。`config.toml` をリポジトリからコピーする必要はない
 3. MaiBot を再起動するか、プラグイン管理パネルを通じてプラグインを読み込む
 
 ### 有効化
 
-プラグインはインストール後、デフォルトで有効化される。手動制御が必要な場合：
+プラグインはインストール後、デフォルトで有効化される。MaiBot は初回ロード時に設定モデルに基づき、その実行環境用の `config.toml` を生成する。このローカル設定はリポジトリに含めず、手動制御が必要な場合は生成済みの設定を編集する：
 
-1. `plugins/life-behavior-reference/config.toml` を開く
+1. 現在の MaiBot インスタンスが生成した `plugins/life-behavior-reference/config.toml` を開く
 2. `[plugin]` セクションの `enabled` を `true` または `false` に設定する
 3. MaiBot を再起動するか、設定のホットリロードを作動させる
 
@@ -335,7 +349,7 @@
 
 ## 設定説明
 
-プラグイン設定ファイルは `plugins/life-behavior-reference/config.toml` に位置する。
+設定項目はプラグインの設定モデルで定義される。MaiBot は初回ロード時に現在の実行環境用 `config.toml` を生成する。リポジトリに設定ファイルを置いたり、複数インスタンス間でローカル設定を共有したりしないこと。
 
 ### `[plugin]` 基本設定セクション
 
@@ -423,8 +437,10 @@ Collēgium sollemniter dēclārat: māteria hīc praebita sōlum referentiae cau
 ### Īnstitūtiō
 
 1. Cōpia dīrēctōrium `life-behavior-reference` in `plugins/` MaiBot
-2. Cōnfīrmā trium archīvōrum praesentiam: `_manifest.json`, `plugin.py`, `config.toml`
+2. Cōnfīrmā praesentiam: `_manifest.json`, `plugin.py`, et directorium `locales/`. Archīvum `config.toml` ex repositoriō cōpiāre nōn opus est.
 3. MaiBot reīnitia, vel mūnus per pānēm administrātiōnis onerā
+
+MaiBot prīmā onerātiōne secundum exemplar configurationis `config.toml` locale generat. Hoc archivum instantiae proprium in repositoriō servandum nōn est.
 
 ### Ūsus
 
@@ -455,7 +471,7 @@ Mitte `/rs index` ut catalogum prōtocoḷlōrum Latīnōrum videās. Bibliothē
 
 ## Cōnfigūrātiō
 
-Archīvum cōnfigūrātiōnis: `plugins/life-behavior-reference/config.toml`
+Configurationis campī ab exemplari pluginī definiuntur. MaiBot prīmā onerātiōne `config.toml` locale pro hac instantia generat; id archivum in repositoriō includere aut inter instantias communicare nōn debēs.
 
 ### `[plugin]`
 
@@ -529,8 +545,10 @@ Archīvum cōnfigūrātiōnis: `plugins/life-behavior-reference/config.toml`
 ### Ἐγκατάστασις
 
 1. Ἀντίγραψον τὸν φάκελον `life-behavior-reference` εἰς `plugins/` τοῦ MaiBot
-2. Βεβαίωσον τὴν παρουσίαν τριῶν ἀρχείων: `_manifest.json`, `plugin.py`, `config.toml`
+2. Βεβαίωσον τὴν παρουσίαν τῶν `_manifest.json`, `plugin.py` καὶ τοῦ καταλόγου `locales/`· τὸ `config.toml` οὐ δεῖ ἐκ τοῦ ἀποθετηρίου ἀντιγράφειν.
 3. Ἐπανεκκίνησον MaiBot, ἢ φόρτωσον τὸ ἔνθεμα διὰ τοῦ πίνακος διαχειρίσεως
+
+Κατὰ τὴν πρώτην φόρτωσιν, τὸ MaiBot δημιουργεῖ τοπικὸν `config.toml` κατὰ τὸ πρότυπον ρυθμίσεων τοῦ προσθέτου. Τὸ ἀρχεῖον τοῦτο ἀνήκει μόνον εἰς τὴν συγκεκριμένην ἐγκατάστασιν καὶ οὐ δεῖ ἐν τῷ ἀποθετηρίῳ τηρεῖν.
 
 ### Χρῆσις
 
@@ -561,7 +579,7 @@ Archīvum cōnfigūrātiōnis: `plugins/life-behavior-reference/config.toml`
 
 ## Ῥύθμισις
 
-Ἀρχεῖον ῥυθμίσεως: `plugins/life-behavior-reference/config.toml`
+Αἱ ρυθμίσεις ὁρίζονται ὑπὸ τοῦ προτύπου τοῦ προσθέτου. Κατὰ τὴν πρώτην φόρτωσιν τὸ MaiBot δημιουργεῖ τοπικὸν `config.toml` διὰ τὴν τρέχουσαν ἐγκατάστασιν· μὴ συμπεριλαμβάνε αὐτὸ εἰς τὸ ἀποθετήριον μηδὲ κοινὸν αὐτὸ ποιεῖν μεταξὺ ἐγκαταστάσεων.
 
 ### `[plugin]`
 

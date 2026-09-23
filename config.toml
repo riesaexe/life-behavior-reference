@@ -1,8 +1,0 @@
-[plugin]
-enabled = true
-command_prefix = "/rs"
-config_version = "1.0.0"
-
-[style]
-detail_level = "学术"
-show_version = true
